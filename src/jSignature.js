@@ -385,7 +385,7 @@ function DataEngine(storageObject, context, startStrokeFn, addToStrokeFn, endStr
 	this._stroke = null;
 	this.startStroke = function(point){
 		if(point && typeof(point.x) == "number" && typeof(point.y) == "number"){
-			this._stroke = {'x':[point.x], 'y':[point.y]};
+			this._stroke = {'x':[point.x], 'y':[point.y], 'time':[point.time], 'force':[point.force]};
 			this.data.push(this._stroke);
 			this._lastPoint = point;
 			this.inStroke = true;
@@ -418,6 +418,8 @@ function DataEngine(storageObject, context, startStrokeFn, addToStrokeFn, endStr
 			var positionInStroke = this._stroke.x.length;
 			this._stroke.x.push(point.x);
 			this._stroke.y.push(point.y);
+			this._stroke.time.push(point.time);
+			this._stroke.force.push(point.force);
 			this._lastPoint = point;
 
 			var stroke = this._stroke
@@ -823,10 +825,14 @@ function jSignatureClass(parent, options, instanceExtensions) {
 			// Windows: Chrome, FF, IE9, Safari
 			// None of that scroll shift calc vs screenXY other sigs do is needed.
 			// ... oh, yeah, the "fatFinger.." is for tablets so that people see what they draw.
-			return new Point(
+			var point = new Point(
 				Math.round(firstEvent.pageX + shiftX)
 				, Math.round(firstEvent.pageY + shiftY) + jSignatureInstance.fatFingerCompensation
 			);
+
+			point.time = new Date().getTime();
+			point.force = firstEvent.force == null || firstEvent.force == 0 ? 1 : firstEvent.force;
+			return point;
 		}
 		, timer = new KickTimerClass(
 			750
